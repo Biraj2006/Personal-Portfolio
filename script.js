@@ -214,8 +214,13 @@ if (contactForm) {
             message: messageInput.value.trim()
         };
 
+        const FORMSPREE_ENDPOINT = "https://formspree.io/f/mwlvqngv";
+        const targetUrl = (contactForm.getAttribute("action") && contactForm.getAttribute("action").includes("mwlvqngv"))
+            ? contactForm.getAttribute("action")
+            : FORMSPREE_ENDPOINT;
+
         try {
-            const response = await fetch(contactForm.getAttribute("action"), {
+            const response = await fetch(targetUrl, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -224,7 +229,9 @@ if (contactForm) {
                 body: JSON.stringify(payload)
             });
 
-            if (response.ok) {
+            const data = await response.json().catch(() => ({}));
+
+            if (response.ok || data.ok === true || response.status === 200) {
                 if (formStatus) {
                     formStatus.className = "form-status success";
                     formStatus.textContent = "Thank you! Your message has been sent successfully. I will get back to you soon.";
@@ -235,7 +242,9 @@ if (contactForm) {
                     submitBtn.innerHTML = '<span>Message Sent!</span> <i data-lucide="check" style="width:16px; margin-left:5px;"></i>';
                     submitBtn.style.background = "#22c55e";
                 }
-                if (window.lucide) lucide.createIcons();
+                if (window.lucide) {
+                    try { lucide.createIcons(); } catch (e) {}
+                }
 
                 setTimeout(() => {
                     if (submitBtn) {
@@ -243,17 +252,16 @@ if (contactForm) {
                         submitBtn.style.background = "";
                         submitBtn.disabled = false;
                     }
-                    if (window.lucide) lucide.createIcons();
+                    if (window.lucide) {
+                        try { lucide.createIcons(); } catch (e) {}
+                    }
                 }, 4000);
             } else {
-                const errorData = await response.json().catch(() => ({}));
                 let errorMessage = "Unable to send your message right now. Please try again or reach out directly at birajbaral102@gmail.com.";
-                if (errorData) {
-                    if (Array.isArray(errorData.errors) && errorData.errors.length > 0) {
-                        errorMessage = errorData.errors.map((err) => err.message).join(", ");
-                    } else if (errorData.error) {
-                        errorMessage = errorData.error;
-                    }
+                if (data && Array.isArray(data.errors) && data.errors.length > 0) {
+                    errorMessage = data.errors.map((err) => err.message).join(", ");
+                } else if (data && data.error) {
+                    errorMessage = data.error;
                 }
                 throw new Error(errorMessage);
             }
@@ -268,7 +276,9 @@ if (contactForm) {
                 submitBtn.innerHTML = originalBtnHTML;
                 submitBtn.disabled = false;
             }
-            if (window.lucide) lucide.createIcons();
+            if (window.lucide) {
+                try { lucide.createIcons(); } catch (e) {}
+            }
         }
     });
 }
