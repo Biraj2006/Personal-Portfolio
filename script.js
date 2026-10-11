@@ -201,22 +201,27 @@ if (contactForm) {
         }
 
         // Submit form
-        const originalBtnHTML = submitBtn ? submitBtn.innerHTML : "Send Message";
+        const originalBtnHTML = submitBtn ? submitBtn.innerHTML : "<span>Send Message</span>";
         if (submitBtn) {
             submitBtn.innerHTML = "<span>Sending...</span>";
             submitBtn.disabled = true;
         }
         if (formStatus) formStatus.style.display = "none";
 
-        const formData = new FormData(contactForm);
+        const payload = {
+            name: nameInput.value.trim(),
+            email: emailInput.value.trim(),
+            message: messageInput.value.trim()
+        };
 
         try {
             const response = await fetch(contactForm.getAttribute("action"), {
                 method: "POST",
-                body: formData,
                 headers: {
-                    Accept: "application/json"
-                }
+                    "Content-Type": "application/json",
+                    "Accept": "application/json"
+                },
+                body: JSON.stringify(payload)
             });
 
             if (response.ok) {
@@ -242,19 +247,28 @@ if (contactForm) {
                 }, 4000);
             } else {
                 const errorData = await response.json().catch(() => ({}));
-                throw new Error(errorData.error || "Submission failed");
+                let errorMessage = "Unable to send your message right now. Please try again or reach out directly at birajbaral102@gmail.com.";
+                if (errorData) {
+                    if (Array.isArray(errorData.errors) && errorData.errors.length > 0) {
+                        errorMessage = errorData.errors.map((err) => err.message).join(", ");
+                    } else if (errorData.error) {
+                        errorMessage = errorData.error;
+                    }
+                }
+                throw new Error(errorMessage);
             }
         } catch (error) {
             console.error("Submission Error:", error);
             if (formStatus) {
                 formStatus.className = "form-status error";
-                formStatus.textContent = "Unable to send your message right now. Please try again or reach out directly at birajbaral102@gmail.com.";
+                formStatus.textContent = error.message || "Unable to send your message right now. Please try again or reach out directly at birajbaral102@gmail.com.";
                 formStatus.style.display = "block";
             }
             if (submitBtn) {
                 submitBtn.innerHTML = originalBtnHTML;
                 submitBtn.disabled = false;
             }
+            if (window.lucide) lucide.createIcons();
         }
     });
 }

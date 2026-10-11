@@ -113,12 +113,12 @@ const textArray = [
 ];
 ```
 
-### 3. Configure the Contact Form
-In `index.html`, locate the form tag:
+### 3. Contact Form Endpoint
+The contact form is configured to send messages to Formspree:
 ```html
-<form id="contact-form" action="https://formspree.io/f/YOUR_FORM_ID" method="POST">
+<form id="contact-form" action="https://formspree.io/f/mwlvqngv" method="POST">
 ```
-Replace the `action` attribute with your unique endpoint from [Formspree](https://formspree.io/).
+To update or change the endpoint in the future, replace the `action` attribute with your new endpoint from [Formspree](https://formspree.io/).
 
 ### 4. Update Resume File
 Place updated resume PDF files in `assets/Biraj_Baral_Resume.pdf`. The download links automatically reference:
