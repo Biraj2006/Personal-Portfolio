@@ -2,152 +2,259 @@
 const typedTextSpan = document.querySelector(".typed-text");
 const cursorSpan = document.querySelector(".cursor");
 
-const textArray = ["Software Developer", "B.Tech IT Student", "Java Enthusiast", "Problem Solver"];
-const typingDelay = 100;
-const erasingDelay = 50;
-const newTextDelay = 2000; // Delay between current and next text
+const textArray = [
+    "B.Tech IT Student",
+    "Software Developer",
+    "Java & Full-Stack Enthusiast",
+    "Problem Solver"
+];
+const typingDelay = 90;
+const erasingDelay = 45;
+const newTextDelay = 2000;
 let textArrayIndex = 0;
 let charIndex = 0;
 
 function type() {
-  if (charIndex < textArray[textArrayIndex].length) {
-    if(!cursorSpan.classList.contains("typing")) cursorSpan.classList.add("typing");
-    typedTextSpan.textContent += textArray[textArrayIndex].charAt(charIndex);
-    charIndex++;
-    setTimeout(type, typingDelay);
-  } 
-  else {
-    cursorSpan.classList.remove("typing");
-  	setTimeout(erase, newTextDelay);
-  }
+    if (!typedTextSpan || !cursorSpan) return;
+    if (charIndex < textArray[textArrayIndex].length) {
+        if (!cursorSpan.classList.contains("typing")) cursorSpan.classList.add("typing");
+        typedTextSpan.textContent += textArray[textArrayIndex].charAt(charIndex);
+        charIndex++;
+        setTimeout(type, typingDelay);
+    } else {
+        cursorSpan.classList.remove("typing");
+        setTimeout(erase, newTextDelay);
+    }
 }
 
 function erase() {
-	if (charIndex > 0) {
-    if(!cursorSpan.classList.contains("typing")) cursorSpan.classList.add("typing");
-    typedTextSpan.textContent = textArray[textArrayIndex].substring(0, charIndex-1);
-    charIndex--;
-    setTimeout(erase, erasingDelay);
-  } 
-  else {
-    cursorSpan.classList.remove("typing");
-    textArrayIndex++;
-    if(textArrayIndex>=textArray.length) textArrayIndex=0;
-    setTimeout(type, typingDelay + 1100);
-  }
+    if (!typedTextSpan || !cursorSpan) return;
+    if (charIndex > 0) {
+        if (!cursorSpan.classList.contains("typing")) cursorSpan.classList.add("typing");
+        typedTextSpan.textContent = textArray[textArrayIndex].substring(0, charIndex - 1);
+        charIndex--;
+        setTimeout(erase, erasingDelay);
+    } else {
+        cursorSpan.classList.remove("typing");
+        textArrayIndex++;
+        if (textArrayIndex >= textArray.length) textArrayIndex = 0;
+        setTimeout(type, typingDelay + 1000);
+    }
 }
 
-document.addEventListener("DOMContentLoaded", function() { // On load, start typing animation
-  if(textArray.length) setTimeout(type, newTextDelay + 250);
-});
-
-/* SCROLL REVEAL */
-const revealElements = document.querySelectorAll('.reveal');
-const revealObserver = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-        if (entry.isIntersecting) {
-            entry.target.classList.add('active');
-            // We keep observing for re-entry animations if desired, 
-            // but for a professional look, once is usually enough.
-            // revealObserver.unobserve(entry.target); 
-        }
-    });
-}, {
-    threshold: 0.15,
-    rootMargin: '0px 0px -50px 0px'
-});
-
-revealElements.forEach(element => {
-    revealObserver.observe(element);
-});
-
-/* STICKY NAVBAR */
-const nav = document.querySelector('nav');
-window.addEventListener('scroll', () => {
-    if (window.scrollY > 80) {
-        nav.classList.add('sticky');
-    } else {
-        nav.classList.remove('sticky');
+document.addEventListener("DOMContentLoaded", () => {
+    if (typedTextSpan && textArray.length) {
+        setTimeout(type, 1000);
     }
 });
 
-/* MOBILE MENU toggle */
-if (menuBtn) {
-    menuBtn.addEventListener('click', () => {
-        navLinks.classList.toggle('active');
-        const spans = menuBtn.querySelectorAll('span');
-        spans.forEach((span, index) => {
-            if (navLinks.classList.contains('active')) {
-                if (index === 0) span.style.transform = 'rotate(45deg) translate(5px, 5px)';
-                if (index === 1) span.style.opacity = '0';
-                if (index === 2) span.style.transform = 'rotate(-45deg) translate(7px, -6px)';
-            } else {
-                span.style.transform = 'none';
-                span.style.opacity = '1';
+/* SCROLL REVEAL (IntersectionObserver) */
+const revealElements = document.querySelectorAll(".reveal");
+if ("IntersectionObserver" in window) {
+    const revealObserver = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add("active");
             }
         });
+    }, {
+        threshold: 0.12,
+        rootMargin: "0px 0px -40px 0px"
+    });
+
+    revealElements.forEach((element) => {
+        revealObserver.observe(element);
+    });
+} else {
+    revealElements.forEach((el) => el.classList.add("active"));
+}
+
+/* STICKY NAVBAR */
+const nav = document.querySelector("nav");
+if (nav) {
+    window.addEventListener("scroll", () => {
+        if (window.scrollY > 60) {
+            nav.classList.add("sticky");
+        } else {
+            nav.classList.remove("sticky");
+        }
     });
 }
 
-// Close mobile menu on link click
-document.querySelectorAll('.nav-links a').forEach(link => {
-    link.addEventListener('click', () => {
-        navLinks.classList.remove('active');
-        const spans = menuBtn.querySelectorAll('span');
-        spans.forEach(span => {
-            span.style.transform = 'none';
-            span.style.opacity = '1';
-        });
-    });
-});
+/* MOBILE MENU TOGGLE & ACCESSIBILITY */
+const menuBtn = document.querySelector(".menu-btn");
+const navLinks = document.querySelector(".nav-links");
 
-/* CONTACT FORM logic with Formspree Fetch */
-const contactForm = document.getElementById('contact-form');
+function toggleMenu(isOpen) {
+    if (!navLinks || !menuBtn) return;
+    const active = typeof isOpen === "boolean" ? isOpen : !navLinks.classList.contains("active");
+    navLinks.classList.toggle("active", active);
+    menuBtn.setAttribute("aria-expanded", active ? "true" : "false");
+
+    const spans = menuBtn.querySelectorAll("span");
+    spans.forEach((span, index) => {
+        if (active) {
+            if (index === 0) span.style.transform = "rotate(45deg) translate(5px, 5px)";
+            if (index === 1) span.style.opacity = "0";
+            if (index === 2) span.style.transform = "rotate(-45deg) translate(7px, -6px)";
+        } else {
+            span.style.transform = "none";
+            span.style.opacity = "1";
+        }
+    });
+}
+
+if (menuBtn && navLinks) {
+    menuBtn.addEventListener("click", () => toggleMenu());
+
+    // Close menu when clicking any nav link
+    navLinks.querySelectorAll("a").forEach((link) => {
+        link.addEventListener("click", () => toggleMenu(false));
+    });
+
+    // Close menu when clicking outside
+    document.addEventListener("click", (e) => {
+        if (navLinks.classList.contains("active") && !navLinks.contains(e.target) && !menuBtn.contains(e.target)) {
+            toggleMenu(false);
+        }
+    });
+
+    // Close menu on Escape key
+    document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape" && navLinks.classList.contains("active")) {
+            toggleMenu(false);
+        }
+    });
+}
+
+/* CONTACT FORM VALIDATION & SUBMISSION */
+const contactForm = document.getElementById("contact-form");
+const formStatus = document.getElementById("form-status");
+
 if (contactForm) {
-    contactForm.addEventListener('submit', async (e) => {
+    const nameInput = document.getElementById("name");
+    const emailInput = document.getElementById("email");
+    const messageInput = document.getElementById("message");
+    const nameError = document.getElementById("name-error");
+    const emailError = document.getElementById("email-error");
+    const messageError = document.getElementById("message-error");
+    const submitBtn = document.getElementById("submit-btn");
+
+    function validateEmail(email) {
+        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    }
+
+    // Clear individual field errors on input
+    [nameInput, emailInput, messageInput].forEach((input) => {
+        if (input) {
+            input.addEventListener("input", () => {
+                input.classList.remove("invalid");
+                const errSpan = document.getElementById(`${input.id}-error`);
+                if (errSpan) errSpan.classList.remove("active");
+                if (formStatus) formStatus.style.display = "none";
+            });
+        }
+    });
+
+    contactForm.addEventListener("submit", async (e) => {
         e.preventDefault();
-        const btn = contactForm.querySelector('button');
-        const originalText = btn.innerHTML;
+
+        let isValid = true;
+
+        // Name validation
+        if (!nameInput || nameInput.value.trim().length < 2) {
+            isValid = false;
+            if (nameInput) nameInput.classList.add("invalid");
+            if (nameError) nameError.classList.add("active");
+        } else {
+            if (nameInput) nameInput.classList.remove("invalid");
+            if (nameError) nameError.classList.remove("active");
+        }
+
+        // Email validation
+        if (!emailInput || !validateEmail(emailInput.value.trim())) {
+            isValid = false;
+            if (emailInput) emailInput.classList.add("invalid");
+            if (emailError) emailError.classList.add("active");
+        } else {
+            if (emailInput) emailInput.classList.remove("invalid");
+            if (emailError) emailError.classList.remove("active");
+        }
+
+        // Message validation
+        if (!messageInput || messageInput.value.trim().length < 10) {
+            isValid = false;
+            if (messageInput) messageInput.classList.add("invalid");
+            if (messageError) messageError.classList.add("active");
+        } else {
+            if (messageInput) messageInput.classList.remove("invalid");
+            if (messageError) messageError.classList.remove("active");
+        }
+
+        if (!isValid) {
+            if (formStatus) {
+                formStatus.className = "form-status error";
+                formStatus.textContent = "Please fill in all required fields properly before submitting.";
+                formStatus.style.display = "block";
+            }
+            return;
+        }
+
+        // Submit form
+        const originalBtnHTML = submitBtn ? submitBtn.innerHTML : "Send Message";
+        if (submitBtn) {
+            submitBtn.innerHTML = "<span>Sending...</span>";
+            submitBtn.disabled = true;
+        }
+        if (formStatus) formStatus.style.display = "none";
+
         const formData = new FormData(contactForm);
-        
-        btn.innerHTML = 'Sending...';
-        btn.disabled = true;
 
         try {
-            const response = await fetch(contactForm.getAttribute('action'), {
-                method: 'POST',
+            const response = await fetch(contactForm.getAttribute("action"), {
+                method: "POST",
                 body: formData,
                 headers: {
-                    'Accept': 'application/json'
+                    Accept: "application/json"
                 }
             });
 
             if (response.ok) {
-                btn.innerHTML = 'Message Sent! <i data-lucide="check" style="width:16px; margin-left:5px;"></i>';
-                btn.style.background = '#22c55e';
+                if (formStatus) {
+                    formStatus.className = "form-status success";
+                    formStatus.textContent = "Thank you! Your message has been sent successfully. I will get back to you soon.";
+                    formStatus.style.display = "block";
+                }
                 contactForm.reset();
-                lucide.createIcons();
+                if (submitBtn) {
+                    submitBtn.innerHTML = '<span>Message Sent!</span> <i data-lucide="check" style="width:16px; margin-left:5px;"></i>';
+                    submitBtn.style.background = "#22c55e";
+                }
+                if (window.lucide) lucide.createIcons();
 
                 setTimeout(() => {
-                    btn.innerHTML = originalText;
-                    btn.style.background = '';
-                    btn.disabled = false;
-                    lucide.createIcons();
+                    if (submitBtn) {
+                        submitBtn.innerHTML = originalBtnHTML;
+                        submitBtn.style.background = "";
+                        submitBtn.disabled = false;
+                    }
+                    if (window.lucide) lucide.createIcons();
                 }, 4000);
             } else {
-                const errorData = await response.json();
-                throw new Error(errorData.error || 'Server error');
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(errorData.error || "Submission failed");
             }
         } catch (error) {
-            console.error('Submission Error:', error);
-            btn.innerHTML = 'Error! Try Again';
-            btn.style.background = '#ef4444'; // Red
-            btn.disabled = false;
-
-            setTimeout(() => {
-                btn.innerHTML = originalText;
-                btn.style.background = '';
-            }, 3000);
+            console.error("Submission Error:", error);
+            if (formStatus) {
+                formStatus.className = "form-status error";
+                formStatus.textContent = "Unable to send your message right now. Please try again or reach out directly at birajbaral102@gmail.com.";
+                formStatus.style.display = "block";
+            }
+            if (submitBtn) {
+                submitBtn.innerHTML = originalBtnHTML;
+                submitBtn.disabled = false;
+            }
         }
     });
 }
