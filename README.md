@@ -170,3 +170,4 @@ You can host this website completely free using any static hosting platform:
 ## 📄 License
 
 This project is licensed under the [MIT License](LICENSE) — feel free to customize and use it for your own portfolio!
+
